@@ -1,0 +1,67 @@
+name: "Topcoder Action Agent"
+description: "Topcoder AI Agent supporting operations using LLMs."
+branding:
+  icon: "git-pull-request"
+  color: "green"
+
+inputs:
+  GITHUB_TOKEN:
+    description: "GitHub token to interact with the repository."
+    required: true
+  AI_AGENT_MODEL:
+    description: "LLM model to use for the AI Agent. Default is 'qwen3'."
+    required: false
+    default: "qwen3:latest"
+  AI_AGENT_TEMPERATURE:
+    description: "Temperature for the AI Agent's responses. Default is 0.5."
+    required: false
+    default: "0.5"
+  AI_AGENT_NUM_CONTEXT:
+    description: "Sets the size of the context window used to generate the next token. Default is 4096."
+    required: false
+    default: "4096"
+  exclude:
+    description: "Glob patterns to exclude files and hide them from the AI Agent"
+    required: false
+    default: ""
+
+jobs:
+  ollama:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install ollama
+        run: curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Create & Configure LLM
+        run: ./create-llm.sh
+        with:
+          AI_AGENT_MODEL: ${{ inputs.AI_AGENT_MODEL }}
+          AI_AGENT_TEMPERATURE: ${{ inputs.AI_AGENT_TEMPERATURE }}
+          AI_AGENT_NUM_CONTEXT: ${{ inputs.AI_AGENT_NUM_CONTEXT }}
+
+  goose:
+    needs: ollama
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Goose AI Agent
+        run: |
+          mkdir -p /home/runner/.local/bin
+          curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh \
+            | CONFIGURE=false INSTALL_PATH=/home/runner/.local/bin bash
+          echo "/home/runner/.local/bin" >> $GITHUB_PATH
+
+      - name: Configure Goose
+        run: |
+          mkdir -p ~/.config/goose
+          cat <<EOF > ~/.config/goose/config.yaml
+          GOOSE_PROVIDER: ollama
+          GOOSE_MODEL: ${{ inputs.AI_AGENT_MODEL }}-tc-agentic-ai
+          keyring: false
+          EOF
+        with:
+          AI_AGENT_MODEL: ${{ inputs.AI_AGENT_MODEL }}
+
+      - name: Check Goose Version
+        run: goose --version
