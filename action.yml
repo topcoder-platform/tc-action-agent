@@ -37,7 +37,7 @@ jobs:
           mkdir -p ~/.config/goose
           cat <<EOF > ~/.config/goose/config.yaml
           GOOSE_PROVIDER: ollama
-          GOOSE_MODEL: ${{ inputs.AI_AGENT_MODEL }}-tc-agentic-ai
+          GOOSE_MODEL: ${{ AI_AGENT_MODEL }}-tc-agentic-ai
           keyring: false
           EOF
       - name: Check Goose Version
