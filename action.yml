@@ -20,25 +20,28 @@ jobs:
       - name: Create & Configure LLM
         run: ./create-llm.sh
 
-  goose:
-    needs: ollama
-    runs-on: ubuntu-latest
+      - name: Check ollama version
+        run: ollama -v && ollama ls
 
-    steps:
-      - name: Install Goose AI Agent
-        run: |
-          mkdir -p /home/runner/.local/bin
-          curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh \
-            | CONFIGURE=false INSTALL_PATH=/home/runner/.local/bin bash
-          echo "/home/runner/.local/bin" >> $GITHUB_PATH
+  # goose:
+  #   needs: ollama
+  #   runs-on: ubuntu-latest
 
-      - name: Configure Goose
-        run: |
-          mkdir -p ~/.config/goose
-          cat <<EOF > ~/.config/goose/config.yaml
-          GOOSE_PROVIDER: ollama
-          GOOSE_MODEL: ${{ AI_AGENT_MODEL }}-tc-agentic-ai
-          keyring: false
-          EOF
-      - name: Check Goose Version
-        run: goose --version
+  #   steps:
+  #     - name: Install Goose AI Agent
+  #       run: |
+  #         mkdir -p /home/runner/.local/bin
+  #         curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh \
+  #           | CONFIGURE=false INSTALL_PATH=/home/runner/.local/bin bash
+  #         echo "/home/runner/.local/bin" >> $GITHUB_PATH
+
+  #     - name: Configure Goose
+  #       run: |
+  #         mkdir -p ~/.config/goose
+  #         cat <<EOF > ~/.config/goose/config.yaml
+  #         GOOSE_PROVIDER: ollama
+  #         GOOSE_MODEL: ${{ AI_AGENT_MODEL }}-tc-agentic-ai
+  #         keyring: false
+  #         EOF
+  #     - name: Check Goose Version
+  #       run: goose --version
